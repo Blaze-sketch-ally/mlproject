@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 # Virtual environments
-.artifacts
+.artifacts/
 .venv/
 venv/
 ENV/
