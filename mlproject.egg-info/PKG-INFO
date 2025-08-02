@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: mlproject
 Version: 0.0.1
 Author: Arunangshu
@@ -6,3 +6,9 @@ Author-email: arunangshupal18@gmail.com
 Requires-Dist: pandas
 Requires-Dist: numpy
 Requires-Dist: seaborn
+Requires-Dist: matplotlib
+Requires-Dist: warnings
+Requires-Dist: dill
+Dynamic: author
+Dynamic: author-email
+Dynamic: requires-dist

@@ -1,16 +1,12 @@
 from dataclasses import dataclass
+import os
+import sys
 import numpy as np
-import pandas as pd
-from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
-from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.metrics import r2_score
 from src.exception import CustomException
 from src.logger import logging
 from src.utils import save_object, evaluate_models
 
-import os
-import sys  
 from catboost import CatBoostRegressor
 from sklearn.ensemble import (
     AdaBoostRegressor,
@@ -18,14 +14,15 @@ from sklearn.ensemble import (
     RandomForestRegressor,
 )
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor
 
+
 @dataclass
 class ModelTrainerConfig:
     trained_model_file_path = os.path.join("artifacts", "model.pkl")
+
 
 class ModelTrainer:
     def __init__(self):
@@ -52,11 +49,51 @@ class ModelTrainer:
                 "AdaBoost Regressor": AdaBoostRegressor(),
             }
 
+            params = {
+                "Decision Tree": {
+                    'criterion': ['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+                    'splitter': ['best', 'random'],
+                    'max_features': ['sqrt', 'log2', None],
+                },
+                "Random Forest": {
+                    'criterion': ['squared_error', 'friedman_mse', 'absolute_error', 'poisson'],
+                    'max_features': ['sqrt', 'log2', None],
+                    'n_estimators': [8, 16, 32, 64, 128, 256]
+                },
+                "Gradient Boosting": {
+                    'loss': ['squared_error', 'huber', 'absolute_error', 'quantile'],
+                    'learning_rate': [0.1, 0.01, 0.05, 0.001],
+                    'subsample': [0.6, 0.7, 0.75, 0.8, 0.85, 0.9],
+                    'criterion': ['squared_error', 'friedman_mse'],
+                    'max_features': ['sqrt', 'log2'],
+                    'n_estimators': [8, 16, 32, 64, 128, 256]
+                },
+                "Linear Regression": {},
+                "K-Neighbors Regressor": {
+                    'n_neighbors': [5, 7, 9, 11],
+                    'weights': ['uniform', 'distance'],
+                    'algorithm': ['ball_tree', 'kd_tree', 'brute']
+                },
+                "XGBoost Regressor": {
+                    'n_estimators': [50, 100, 150],
+                    'learning_rate': [0.05, 0.1, 0.2]
+                },
+                "CatBoost Regressor": {
+                    'depth': [4, 6, 8],
+                    'learning_rate': [0.05, 0.1],
+                    'iterations': [50, 100]
+                },
+                "AdaBoost Regressor": {
+                    'n_estimators': [50, 100, 150],
+                    'learning_rate': [0.01, 0.1, 1.0]
+                }
+            }
+
             logging.info("Evaluating all models...")
             model_report: dict = evaluate_models(
                 x_train=x_train, y_train=y_train,
                 x_test=x_test, y_test=y_test,
-                models=models
+                models=models, param=params
             )
 
             best_model_score = max(model_report.values())
